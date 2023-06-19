@@ -20,6 +20,7 @@
 	"contributionscores-rank": "Posición",
 	"contributionscores-pages": "Páginas",
 	"contributionscores-changes": "Cambios",
+	"contributionscores-bytechanges": "Bytes cambiados",
 	"contributionscores-username": "Nombre de usuario",
 	"contributionscores-invalidusername": "Nombre de usuario no válido",
 	"contributionscores-invalidmetric": "Medida inválida"

@@ -104,10 +104,11 @@ class ContributionScores extends IncludableSpecialPage {
 			$date = time() - ( 60 * 60 * 24 * $days );
 			$sqlWhere[] = 'rev_timestamp > ' . $dbr->addQuotes( $dbr->timestamp( $date ) );
 		}
-
+		$prevRevLength = 'COALESCE((SELECT rev_len FROM revision AS prev_rev WHERE prev_rev.rev_id = revision.rev_parent_id), 0)';
 		$sqlVars = [
 			'rev_user'   => $revUser,
-			'page_count' => 'COUNT(DISTINCT rev_page)'
+			'page_count' => 'COUNT(DISTINCT rev_page)',
+			'bytes_changed' => 'SUM(rev_len)-' . $prevRevLength
 		];
 		if ( $wgContribScoreUseRoughEditCount ) {
 			$revQuery['tables'][] = 'user';
@@ -179,7 +180,8 @@ class ContributionScores extends IncludableSpecialPage {
 				'user_real_name',
 				'page_count',
 				'rev_count',
-				'wiki_rank' => 'page_count+SQRT(rev_count-page_count)*2',
+				'bytes_changed',
+				'wiki_rank' => 'page_count+SQRT(rev_count-page_count)*2+SQRT(bytes_changed)/2',
 			],
 			[],
 			__METHOD__,
@@ -223,6 +225,7 @@ class ContributionScores extends IncludableSpecialPage {
 			Html::element( 'th', [], $this->msg( 'contributionscores-score' )->text() ) .
 			Html::element( 'th', [], $this->msg( 'contributionscores-pages' )->text() ) .
 			Html::element( 'th', [], $this->msg( 'contributionscores-changes' )->text() ) .
+			Html::element( 'th', [], $this->msg( 'contributionscores-bytechanges' )->text() ) .
 			Html::element( 'th', [], $this->msg( 'contributionscores-username' )->text() );
 
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
@@ -269,6 +272,8 @@ class ContributionScores extends IncludableSpecialPage {
 				$lang->formatNum( $row->page_count ) .
 				"\n</td><td class='content' style='padding-right:10px;text-align:right;'>" .
 				$lang->formatNum( $row->rev_count ) .
+				"\n</td><td class='content' style='padding-right:10px;text-align:right;'>" .
+				$lang->formatNum( $row->bytes_changed ) .
 				"\n</td><td class='content'>" .
 				$userLink;
 
