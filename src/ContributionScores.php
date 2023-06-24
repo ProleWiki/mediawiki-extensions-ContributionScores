@@ -108,7 +108,7 @@ class ContributionScores extends IncludableSpecialPage {
 		$sqlVars = [
 			'rev_user'   => $revUser,
 			'page_count' => 'COUNT(DISTINCT rev_page)',
-			'bytes_changed' => 'SUM(rev_len)-' . $prevRevLength
+			'bytes_changed' => 'SUM(GREATEST(rev_len-' . $prevRevLength . ',0))'
 		];
 		if ( $wgContribScoreUseRoughEditCount ) {
 			$revQuery['tables'][] = 'user';
